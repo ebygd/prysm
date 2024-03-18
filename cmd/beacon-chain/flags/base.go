@@ -259,4 +259,9 @@ var (
 		Usage: "Directory for the slasher database",
 		Value: cmd.DefaultDataDir(),
 	}
+	// Byzantine enables the node to act misbehaving
+	Byzantine = &cli.BoolFlag{
+		Name:  "byzantine-behaviour",
+		Usage: "Enables byzantine bevhaiour",
+	}
 )

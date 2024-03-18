@@ -2,9 +2,11 @@ package validator
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/core/helpers"
 	"github.com/prysmaticlabs/prysm/v5/beacon-chain/rpc/core"
+	"github.com/prysmaticlabs/prysm/v5/cmd/beacon-chain/flags"
 	"github.com/prysmaticlabs/prysm/v5/config/params"
 	"github.com/prysmaticlabs/prysm/v5/encoding/bytesutil"
 	ethpb "github.com/prysmaticlabs/prysm/v5/proto/prysm/v1alpha1"
@@ -21,6 +23,8 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 	ctx, span := trace.StartSpan(ctx, "AggregatorServer.SubmitAggregateSelectionProof")
 	defer span.End()
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
+
+	fmt.Printf("UIS SubmitAggregateSelectionProof slot: %d, committeeIndex: %d \n", req.GetSlot(), req.GetCommitteeIndex())
 
 	if vs.SyncChecker.Syncing() {
 		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
@@ -53,6 +57,14 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 	committee, err := helpers.BeaconCommittee(ctx, activeValidatorIndices, seed, req.Slot, req.CommitteeIndex)
 	if err != nil {
 		return nil, err
+	}
+
+	fmt.Printf("UIS SubmitAggregateSelectionProof committee: %v \n", committee)
+
+	// If validator is byzantine it should not broadcast an aggregated attestation (free riding)
+	if flags.Get().Byzantine {
+		fmt.Printf("UIS SubmitAggregateSelectionProof Byzanitne behaviour \n")
+		return nil, status.Errorf(codes.Internal, "Validator: %d is byzantine", validatorIndex)
 	}
 
 	// Check if the validator is an aggregator

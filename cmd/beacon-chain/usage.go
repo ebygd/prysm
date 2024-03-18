@@ -130,6 +130,7 @@ var appHelpFlagGroups = []flagGroup{
 			flags.SlasherDirFlag,
 			flags.LocalBlockValueBoost,
 			flags.JwtId,
+			flags.Byzantine,
 			checkpoint.BlockPath,
 			checkpoint.StatePath,
 			checkpoint.RemoteURL,

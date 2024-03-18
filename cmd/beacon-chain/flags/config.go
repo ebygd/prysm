@@ -15,6 +15,7 @@ type GlobalFlags struct {
 	BlockBatchLimitBurstFactor int
 	BlobBatchLimit             int
 	BlobBatchLimitBurstFactor  int
+	Byzantine                  bool
 }
 
 var globalConfig *GlobalFlags
@@ -45,6 +46,7 @@ func ConfigureGlobalFlags(ctx *cli.Context) {
 	cfg.BlobBatchLimit = ctx.Int(BlobBatchLimit.Name)
 	cfg.BlobBatchLimitBurstFactor = ctx.Int(BlobBatchLimitBurstFactor.Name)
 	cfg.MinimumPeersPerSubnet = ctx.Int(MinPeersPerSubnet.Name)
+	cfg.Byzantine = ctx.Bool(Byzantine.Name)
 	configureMinimumPeers(ctx, cfg)
 
 	Init(cfg)
