@@ -141,6 +141,7 @@ var appHelpFlagGroups = []flagGroup{
 			backfill.EnableExperimentalBackfill,
 			backfill.BackfillWorkerCount,
 			backfill.BackfillBatchSize,
+			backfill.BackfillOldestSlot,
 		},
 	},
 	{
