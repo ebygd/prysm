@@ -24,8 +24,6 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 	defer span.End()
 	span.AddAttributes(trace.Int64Attribute("slot", int64(req.Slot)))
 
-	fmt.Printf("UIS SubmitAggregateSelectionProof slot: %d, committeeIndex: %d \n", req.GetSlot(), req.GetCommitteeIndex())
-
 	if vs.SyncChecker.Syncing() {
 		return nil, status.Errorf(codes.Unavailable, "Syncing to latest head, not ready to respond")
 	}
@@ -57,14 +55,6 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 	committee, err := helpers.BeaconCommittee(ctx, activeValidatorIndices, seed, req.Slot, req.CommitteeIndex)
 	if err != nil {
 		return nil, err
-	}
-
-	fmt.Printf("UIS SubmitAggregateSelectionProof committee: %v \n", committee)
-
-	// If validator is byzantine it should not broadcast an aggregated attestation (free riding)
-	if flags.Get().Byzantine {
-		fmt.Printf("UIS SubmitAggregateSelectionProof Byzanitne behaviour \n")
-		return nil, status.Errorf(codes.Internal, "Validator: %d is byzantine", validatorIndex)
 	}
 
 	// Check if the validator is an aggregator
@@ -111,6 +101,15 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 			best = aggregatedAtt
 		}
 	}
+
+	fmt.Printf("UIS SubmitAggregateSelectionProof committee: %v, slot: %d, committeeIndex: %d bitsCount: %d, bool: %t \n", committee, req.GetSlot(), req.GetCommitteeIndex(), best.AggregationBits.Count(), len(committee) == int(best.AggregationBits.Count()))
+
+	// If validator is byzantine it should not broadcast an aggregated attestation (free riding)
+	if flags.Get().Byzantine {
+		fmt.Printf("UIS SubmitAggregateSelectionProof Byzantine Behaviour from Validator: %d, Slot: %d \n", validatorIndex, req.GetSlot())
+		return nil, status.Errorf(codes.Internal, "Validator: %d is byzantine", validatorIndex)
+	}
+
 	a := &ethpb.AggregateAttestationAndProof{
 		Aggregate:       best,
 		SelectionProof:  req.SlotSignature,

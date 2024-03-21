@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -39,6 +40,8 @@ import (
 func (s *Service) OnAttestation(ctx context.Context, a *ethpb.Attestation, disparity time.Duration) error {
 	ctx, span := trace.StartSpan(ctx, "blockChain.onAttestation")
 	defer span.End()
+
+	fmt.Printf("UIS OnAttestation slot: %d, disparity: %v, committeeIndex: %d, bitsCount: %v \n", a.GetData().GetSlot(), disparity, a.GetData().GetCommitteeIndex(), a.GetAggregationBits().Count())
 
 	if err := helpers.ValidateNilAttestation(a); err != nil {
 		return err

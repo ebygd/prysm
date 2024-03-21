@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/pkg/errors"
@@ -37,6 +38,8 @@ func (vs *Server) packAttestations(ctx context.Context, latestState state.Beacon
 	if err != nil {
 		return nil, errors.Wrap(err, "could not filter attestations")
 	}
+	fmt.Printf("UIS packAttestations atts: %d , uAtts: %d, Slot: %d \n", len(atts), len(uAtts), latestState.Slot())
+
 	atts = append(atts, uAtts...)
 
 	// Remove duplicates from both aggregated/unaggregated attestations. This

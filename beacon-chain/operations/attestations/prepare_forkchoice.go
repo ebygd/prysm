@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/prysmaticlabs/go-bitfield"
@@ -60,6 +61,8 @@ func (s *Service) prepareForkChoiceAtts() {
 func (s *Service) batchForkChoiceAtts(ctx context.Context) error {
 	ctx, span := trace.StartSpan(ctx, "Operations.attestations.batchForkChoiceAtts")
 	defer span.End()
+
+	fmt.Printf("batchForkChoiceAtts \n")
 
 	if err := s.cfg.Pool.AggregateUnaggregatedAttestations(ctx); err != nil {
 		return err
