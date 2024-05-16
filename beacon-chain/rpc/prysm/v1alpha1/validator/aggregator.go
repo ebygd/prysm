@@ -43,6 +43,14 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 		return nil, status.Error(codes.Internal, "Could not locate validator index in DB")
 	}
 
+	// If validator is byzantine it should not broadcast an aggregated attestation (free riding)
+	if flags.Get().Byzantine {
+		fmt.Printf("Byzantine: SubmitAggregateSelectionProof Byzantine Behaviour from Validator: %d, Slot: %d \n", validatorIndex, req.GetSlot())
+		return nil, status.Errorf(codes.Internal, "Validator: %d is byzantine", validatorIndex)
+	} else {
+		fmt.Printf("Non-Byzantine: SubmitAggregateSelectionProof from Validator: %d, Slot: %d \n", validatorIndex, req.GetSlot())
+	}
+
 	epoch := slots.ToEpoch(req.Slot)
 	activeValidatorIndices, err := helpers.ActiveValidatorIndices(ctx, st, epoch)
 	if err != nil {
@@ -100,14 +108,6 @@ func (vs *Server) SubmitAggregateSelectionProof(ctx context.Context, req *ethpb.
 			aggregatedAtt.AggregationBits.Count() > best.AggregationBits.Count() {
 			best = aggregatedAtt
 		}
-	}
-
-	fmt.Printf("UIS SubmitAggregateSelectionProof committee: %v, slot: %d, committeeIndex: %d bitsCount: %d, bool: %t \n", committee, req.GetSlot(), req.GetCommitteeIndex(), best.AggregationBits.Count(), len(committee) == int(best.AggregationBits.Count()))
-
-	// If validator is byzantine it should not broadcast an aggregated attestation (free riding)
-	if flags.Get().Byzantine {
-		fmt.Printf("UIS SubmitAggregateSelectionProof Byzantine Behaviour from Validator: %d, Slot: %d \n", validatorIndex, req.GetSlot())
-		return nil, status.Errorf(codes.Internal, "Validator: %d is byzantine", validatorIndex)
 	}
 
 	a := &ethpb.AggregateAttestationAndProof{

@@ -19,8 +19,6 @@ func (c *AttCaches) SaveUnaggregatedAttestation(att *ethpb.Attestation) error {
 		return errors.New("attestation is aggregated")
 	}
 
-	//fmt.Printf("UIS SaveUnaggregatedAttestation bitsCount: %d, slot: %d, comitteeIndex: %d \n", att.GetAggregationBits().Count(), att.GetData().GetSlot(), att.GetData().CommitteeIndex)
-
 	seen, err := c.hasSeenBit(att)
 	if err != nil {
 		return err

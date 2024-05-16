@@ -146,8 +146,6 @@ func (s *Service) internalBroadcastAttestation(ctx context.Context, subnet uint6
 		return
 	}
 
-	//fmt.Printf("UIS broadcastAttestation subnet: %d, slot: %d, committeeIndex: %d, bitsCount: %d  \n", subnet, att.GetData().GetSlot(), att.GetData().GetCommitteeIndex(), att.GetAggregationBits().Count())
-
 	if err := s.broadcastObject(ctx, att, attestationToTopic(subnet, forkDigest)); err != nil {
 		log.WithError(err).Error("Failed to broadcast attestation")
 		tracing.AnnotateError(span, err)
